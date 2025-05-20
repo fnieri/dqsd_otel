@@ -9,10 +9,15 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    {ok, ListenSocket} = gen_tcp:listen(8081, [binary, {packet, line}, {active, false}, {reuseaddr, true}]),
-    spawn(fun() -> accept_loop(ListenSocket) end),
-    {ok, #{socket => ListenSocket}}.
-
+    case gen_tcp:listen(8081, [binary, {packet, line}, {active, false}, {reuseaddr, true}]) of
+    {ok, ListenSocket} ->
+        spawn(fun() -> accept_loop(ListenSocket) end),
+    
+    {ok, #{socket => ListenSocket}};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+    
 accept_loop(ListenSocket) ->
     {ok, Socket} = gen_tcp:accept(ListenSocket),
     spawn(fun() -> handle_client(Socket) end),
@@ -24,7 +29,7 @@ handle_client(Socket) ->
         {ok, Line} ->
             Trimmed = binary:replace(Line, <<"\n">>, <<>>, [global]),
             io:format("~p~n", [Trimmed]),
-            otel_wrapper:handle_c_message(Trimmed),
+            dqsd_otel:handle_c_message(Trimmed),
             handle_client(Socket);
         {error, closed} ->
              io:format("Closed"),

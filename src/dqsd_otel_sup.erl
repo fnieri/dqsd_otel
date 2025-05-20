@@ -23,7 +23,7 @@ init([]) ->
           modules => [dqsd_otel_tcp_server]},
           
         #{id => tcp_client,      
-          start => {wrapper_tcp_client, start_link, []},
+          start => {dqsd_otel_tcp_client, start_link, []},
           restart => permanent,
           shutdown => brutal_kill,
           type => worker,

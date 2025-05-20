@@ -3,7 +3,7 @@
      {vsn, "git"},
      {modules, [dqsd_otel, dqsd_otel_sup, dqsd_otel_tcp_client, dqsd_otel_tcp_server]},
      {registered, [dqsd_otel_sup]},
-     {applications, [kernel, stdlib, opentelemetry, opentelemetry_api]},
+     {applications, [kernel, stdlib, opentelemetry_exporter, opentelemetry, opentelemetry_api]},
      {mod, {dqsd_otel, []}},
      {env, []},
      {mantainers,["Francesco Nieri"]},
