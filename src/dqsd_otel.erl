@@ -116,7 +116,7 @@ fail_span(Pid) ->
     case Pid of
         ignore -> ok;
     _ when is_pid(Pid) ->
-        Pid ! fail_span
+        Pid ! {fail_span, erlang:system_time(nanosecond)}
     end.
 
 
@@ -125,7 +125,7 @@ fail_span(Pid) ->
 -spec with_span(binary(), fun(() -> any())) -> any().
 with_span(Name, Fun) ->
     ?with_span(Name, #{}, 
-        fun(SpanCtx) ->
+        fun(_SpanCtx) ->
             Pid = start_with_span(Name),
             Result = Fun(),
             end_with_span(Pid),
@@ -136,7 +136,7 @@ with_span(Name, Fun) ->
 -spec with_span(binary(), fun(() -> any()), map()) -> any().
 with_span(Name, Fun, Attrs) when is_map(Attrs), is_function(Fun, 0) ->
     ?with_span(Name, Attrs,
-        fun(SpanCtx) ->
+        fun(_SpanCtx) ->
             Pid = start_with_span(Name),
             Result = Fun(),
             end_with_span(Pid),
@@ -171,16 +171,17 @@ end_with_span(Pid) ->
 %%%=======================
 
 span_process(NameBin, StartTime, Timeout) ->
-    Timer = erlang:send_after(Timeout, self(), timeout),
+    Deadline = StartTime + (Timeout * 1000000),
+    Timer = erlang:send_after(Timeout, self(), {timeout, Deadline}),
     receive
-        fail_span ->
+        {fail_span, EndTime} ->
             erlang:cancel_timer(Timer),
-            send_span(NameBin, StartTime, 0, <<"fa">>);
+            send_span(NameBin, StartTime, EndTime, <<"fa">>);
         {end_span, EndTime} ->
             erlang:cancel_timer(Timer),
             send_span(NameBin, StartTime, EndTime, <<"ok">>);
-        timeout ->
-            send_span(NameBin, StartTime, 0, <<"to">>)
+        {timeout, Deadline} ->
+            send_span(NameBin, StartTime, Deadline, <<"to">>)
     end.
 
 
@@ -194,18 +195,18 @@ handle_c_message(Bin) when is_binary(Bin) ->
             case string:to_integer(binary_to_list(TimeoutBin)) of
                 {Timeout, _} when is_integer(Timeout) ->
                     ets:insert(timeout_registry, {Name, Timeout}),
-                    io:format("Timeout set: ~p = ~p~n", [Name, Timeout]);
+                    io:format("dqsd_otel: Timeout set: ~p = ~p~n", [Name, Timeout]);
                 _ ->
-                    io:format("Invalid timeout: ~p~n", [TimeoutBin])
+                    io:format("dqsd_otel: Invalid timeout: ~p~n", [TimeoutBin])
             end;
         [<<"start_stub">>] ->
             ets:insert(otel_state, {stub_running, true}),
-            io:format("Stub enabled~n");
+            io:format("dqsd_otel: Stub enabled~n");
         [<<"stop_stub">>] ->
             ets:insert(otel_state, {stub_running, false}),
-            io:format("Stub stopped~n");
+            io:format("dqsd_otel: Stub stopped~n");
         _ ->
-            io:format("Unknown command: ~p~n", [Bin])
+            io:format("dqsd_otel: Unknown command: ~p~n", [Bin])
     end.
 
 %%%=======================
