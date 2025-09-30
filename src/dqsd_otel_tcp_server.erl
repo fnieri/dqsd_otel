@@ -22,7 +22,7 @@
     acceptor   %% PID of acceptor process
 }).
 
--spec start_link() -> {ok, Pid} | ignore | {error, Reason}
+-spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
@@ -34,7 +34,7 @@ start_link() ->
 %% Port is an integer.
 %%--------------------------------------------------------------------
 
--spec start_server(string() | binary() | tuple(), integer()) -> ok | {error, Reason}
+-spec start_server(string() | binary() | tuple(), integer()) -> ok | {error, term()}.
 start_server(IP, Port) ->
     gen_server:call(?MODULE, {start, IP, Port}).
 

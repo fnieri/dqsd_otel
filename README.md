@@ -1,7 +1,7 @@
 dqsd_otel
 =====
 
-The OpenTelemetry Wrapper for the ΔQ oscilloscope
+The ΔQ OpenTelemetry Adapter for the ΔQ oscilloscope
 
 Build
 -----

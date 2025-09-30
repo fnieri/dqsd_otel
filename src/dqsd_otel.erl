@@ -106,7 +106,7 @@ end_span(Ctx, Pid) ->
         case Pid of
             ignore -> ok;
         _ when is_pid(Pid) ->
-            Pid ! {end_span, erlang:system_time(nanosecond)}
+            Pid ! {<<"end_span">>, erlang:system_time(nanosecond)}
     end.
 
 
@@ -116,7 +116,7 @@ fail_span(Pid) ->
     case Pid of
         ignore -> ok;
     _ when is_pid(Pid) ->
-        Pid ! {fail_span, erlang:system_time(nanosecond)}
+        Pid ! {<<"fail_span">>, erlang:system_time(nanosecond)}
     end.
 
 
@@ -142,6 +142,7 @@ with_span(Name, Fun, Attrs) when is_map(Attrs), is_function(Fun, 0) ->
             end_with_span(Pid),
             Result
         end).
+
 start_with_span(Name) ->
     case ets:lookup(otel_state, stub_running) of
         [{_, true}] ->
@@ -161,7 +162,7 @@ end_with_span(Pid) ->
         case Pid of
             ignore -> ok;
         _ when is_pid(Pid) ->
-            Pid ! {end_span, erlang:system_time(nanosecond)}
+            Pid ! {<<"end_span">>, erlang:system_time(nanosecond)}
     end.
 
 
@@ -172,15 +173,16 @@ end_with_span(Pid) ->
 
 span_process(NameBin, StartTime, Timeout) ->
     Deadline = StartTime + (Timeout * 1000000),
-    Timer = erlang:send_after(Timeout, self(), {timeout, Deadline}),
+    Timer = erlang:send_after(Timeout, self(), {<<"timeout">>, Deadline}),
     receive
-        {fail_span, EndTime} ->
+        {<<"fail_span">>, EndTime} ->
+            io:format("failure"),
             erlang:cancel_timer(Timer),
             send_span(NameBin, StartTime, EndTime, <<"fa">>);
-        {end_span, EndTime} ->
+        {<<"end_span">>, EndTime} ->
             erlang:cancel_timer(Timer),
             send_span(NameBin, StartTime, EndTime, <<"ok">>);
-        {timeout, Deadline} ->
+        {<<"timeout">>, Deadline} ->
             send_span(NameBin, StartTime, Deadline, <<"to">>)
     end.
 

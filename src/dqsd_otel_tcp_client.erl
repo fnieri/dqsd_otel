@@ -61,8 +61,8 @@ handle_cast({try_connect, IP, Port}, State) ->
     end,
     case gen_tcp:connect(IPStr, Port, [binary, {active, false}]) of
         {ok, Socket} ->
-            io:format("dqsd_otel: Wrapper connected to ~s:~p~n", [IPStr, Port]),
-            
+            io:format("dqsd_otel: Adapter connected to ~s:~p~n", [IPStr, Port]),
+
             case State#state.socket of
                 undefined -> ok;
                 OldSocket -> catch gen_tcp:close(OldSocket)
