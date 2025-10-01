@@ -2,6 +2,15 @@ dqsd_otel
 =====
 The OpenTelemetry ΔQ Adapter for the [ΔQ oscilloscope](https://github.com/fnieri/DeltaQOscilloscope).
 
+# How to start
+
+    To start the oscilloscope:
+    
+    ```
+    application:ensure_all_started(dqsd_otel).
+    ```
+    This will ensure all the dependencies are correctly started and the servers are properly initialised.
+
 ## Usage
 A system instrumented with OpenTelemetry has spans and traces to observe the execution of an operation. The same level of observability must be assured in the oscilloscope, this is why we provide the concept of probes, which, like spans, follow an execution from start to end.
 To observe a system, we must put probes in it. For each outcome of interest, a probe (observation point) is attached to measure the delay of the outcome, like one would in
