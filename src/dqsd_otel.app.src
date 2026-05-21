@@ -1,7 +1,7 @@
 {application, dqsd_otel,
     [{description, "An OpenTelemetry Wrapper for the ΔQ Oscilloscope"},
      {vsn, "git"},
-     {modules, [dqsd_otel, dqsd_otel_sup, dqsd_otel_tcp_client, dqsd_otel_tcp_server]},
+     {modules, [dqsd_otel, dqsd_otel_sup, dqsd_otel_tcp_client]},
      {registered, [dqsd_otel_sup]},
      {applications, [kernel, stdlib, tls_certificate_check, opentelemetry_exporter, opentelemetry, opentelemetry_api]},
      {mod, {dqsd_otel, []}},

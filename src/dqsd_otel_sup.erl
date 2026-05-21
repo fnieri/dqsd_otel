@@ -14,15 +14,8 @@ init([]) ->
           shutdown => brutal_kill,
           type => worker,
           modules => [dqsd_otel]},
-         
-        #{id => tcp_server,
-          start => {dqsd_otel_tcp_server, start_link, []},
-          restart => permanent,
-          shutdown => brutal_kill,
-          type => worker,
-          modules => [dqsd_otel_tcp_server]},
-          
-        #{id => tcp_client,      
+
+        #{id => tcp_client,
           start => {dqsd_otel_tcp_client, start_link, []},
           restart => permanent,
           shutdown => brutal_kill,
@@ -30,4 +23,3 @@ init([]) ->
           modules => [dqsd_otel_tcp_client]}
     ],
     {ok, {{one_for_one, 5, 10}, ChildSpecs}}.
-
