@@ -176,7 +176,6 @@ span_process(NameBin, StartTime, Timeout) ->
     Timer = erlang:send_after(Timeout, self(), {<<"timeout">>, Deadline}),
     receive
         {<<"fail_span">>, EndTime} ->
-            io:format("failure"),
             erlang:cancel_timer(Timer),
             send_span(NameBin, StartTime, EndTime, <<"fa">>);
         {<<"end_span">>, EndTime} ->
